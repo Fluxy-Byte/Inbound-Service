@@ -3,3 +3,4 @@ dist/
 generated/
 .env
 *.log
+.env-producao
