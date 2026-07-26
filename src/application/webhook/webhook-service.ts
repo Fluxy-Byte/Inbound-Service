@@ -12,6 +12,7 @@ import { popDebounceWindow, pushToDebounceWindow } from "./debounce-service";
 import { mapMetaMessageType } from "./message-type-mapper";
 import { resolveOrCreateMessagingSession } from "./messaging-session-service";
 import { saveInboundMessage } from "./mongo-message-service";
+import { isSessionProcessing, markSessionProcessing } from "./processing-state-service";
 import { resolveOrCreateTarget, resolveWhatsappChannel } from "./target-service";
 
 function agentPayload(agent: {
@@ -120,6 +121,7 @@ export async function handleInboundMessage(
   // produto para reengajamento automático de uma conversa "FINISHED" (mesmo
   // gap do sistema deprecado), então tratamos igual a "AI" por ora.
   if (message.type !== "text") {
+    await markSessionProcessing(messagingSession.id);
     await publishJson(channel, resolveAgentQueueName(whatsappChannel.agent.name), {
       target: targetPayload,
       whatsappChannel: whatsappChannelPayload,
@@ -138,7 +140,12 @@ export async function handleInboundMessage(
     timestamp: message.timestamp,
   });
 
-  if (isFirstInWindow) {
+  // processingMessage só faz sentido como aviso de "cheguei em cima de algo
+  // que já está rodando" — só dispara se (a) esta mensagem abre uma janela de
+  // agrupamento nova E (b) já existe um lote anterior daquela sessão em
+  // processamento no AI-Worker. Mensagem de abertura de conversa (ou
+  // qualquer turno sem sobreposição) não deve gerar esse aviso.
+  if (isFirstInWindow && (await isSessionProcessing(messagingSession.id))) {
     await publishJson(channel, QUEUE_OUTBOUND_MESSAGE_SEND, {
       target: targetPayload,
       whatsappChannel: whatsappChannelPayload,
@@ -170,6 +177,7 @@ export async function flushDebounceWindow(channel: Channel, messagingSessionId: 
   const target = messagingSession.target;
   const whatsappChannel = target.whatsappChannel;
 
+  await markSessionProcessing(messagingSessionId);
   await publishJson(channel, resolveAgentQueueName(whatsappChannel.agent.name), {
     target: { id: target.id, waId: target.waId, name: target.name, metadata: target.metadata },
     whatsappChannel: {
