@@ -26,21 +26,15 @@ export async function pushToDebounceWindow(
   messagingSessionId: string,
   message: DebouncedMessage,
 ): Promise<{ isFirstInWindow: boolean }> {
-  const length = await redis.rpush(queueKey(messagingSessionId), JSON.stringify(message));
+  await redis.rpush(queueKey(messagingSessionId), JSON.stringify(message));
   const previous = await redis.set(markerKey(messagingSessionId), "1", "EX", WINDOW_SECONDS, "GET");
-  const isFirstInWindow = previous === null;
-  console.log(
-    `[debounce] push session=${messagingSessionId} externalMessageId=${message.externalMessageId} ` +
-      `queueLength=${length} isFirstInWindow=${isFirstInWindow}`,
-  );
-  return { isFirstInWindow };
+  return { isFirstInWindow: previous === null };
 }
 
 export async function popDebounceWindow(messagingSessionId: string): Promise<DebouncedMessage[]> {
   const key = queueKey(messagingSessionId);
   const raw = await redis.lrange(key, 0, -1);
   await redis.del(key);
-  console.log(`[debounce] pop session=${messagingSessionId} — ${raw.length} item(ns) na fila: ${raw.join(" | ")}`);
   return raw.map((item) => JSON.parse(item) as DebouncedMessage);
 }
 
