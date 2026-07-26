@@ -26,14 +26,26 @@ export function buildWebhookRouter(channel: Channel): Router {
       const body = req.body as MetaWebhookBody;
       const value = body?.entry?.[0]?.changes?.[0]?.value;
 
+      console.log(
+        `[webhook] POST recebido phoneNumberId=${value?.metadata?.phone_number_id} ` +
+          `statuses=${value?.statuses?.length ?? 0} messages=${value?.messages?.length ?? 0}`,
+      );
+
       if (value?.statuses) {
         for (const status of value.statuses) {
           await handleStatus(channel, value.metadata.phone_number_id, status);
         }
       } else if (value?.messages) {
         for (const message of value.messages) {
+          console.log(
+            `[webhook] mensagem recebida id=${message.id} type=${message.type} from=${message.from} ` +
+              `timestamp=${message.timestamp}`,
+          );
           await handleInboundMessage(channel, value.metadata.phone_number_id, message, value.contacts?.[0]);
+          console.log(`[webhook] mensagem id=${message.id} processada até o fim sem exceção`);
         }
+      } else {
+        console.log(`[webhook] payload sem statuses nem messages: ${JSON.stringify(body)}`);
       }
 
       res.sendStatus(200);

@@ -24,6 +24,7 @@ export function startDebounceWorker(onWindowClosed: (messagingSessionId: string)
 
   subscriber.on("pmessage", async (_pattern, _channel, expiredKey: string) => {
     const messagingSessionId = extractSessionIdFromMarkerKey(expiredKey);
+    console.log(`[debounce-worker] chave expirada: ${expiredKey} — sessionId extraído: ${messagingSessionId}`);
     if (!messagingSessionId) return;
 
     try {
