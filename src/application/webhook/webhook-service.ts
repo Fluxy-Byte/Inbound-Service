@@ -107,6 +107,7 @@ export async function handleInboundMessage(
   const messagingSessionPayload = { id: messagingSession.id, startedAt: messagingSession.startedAt };
 
   if (target.status === "HUMAN") {
+    console.log(`[DESK-MSG][webhook-service] targetId=${target.id} status=HUMAN — roteando para desk.message.inbound`);
     await publishJson(channel, QUEUE_DESK_MESSAGE_INBOUND, {
       target: targetPayload,
       whatsappChannel: whatsappChannelPayload,
@@ -146,6 +147,9 @@ export async function handleInboundMessage(
   // processamento no AI-Worker. Mensagem de abertura de conversa (ou
   // qualquer turno sem sobreposição) não deve gerar esse aviso.
   if (isFirstInWindow && (await isSessionProcessing(messagingSession.id))) {
+    console.log(
+      `[DESK-MSG][webhook-service] targetId=${target.id} status=${target.status} sessão em processamento — enviando processingMessage`,
+    );
     await publishJson(channel, QUEUE_OUTBOUND_MESSAGE_SEND, {
       target: targetPayload,
       whatsappChannel: whatsappChannelPayload,
