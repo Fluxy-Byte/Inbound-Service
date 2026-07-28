@@ -44,8 +44,8 @@ function agentPayload(agent: {
     errorMessage: agent.errorMessage,
     errorEnabled: agent.errorEnabled,
     defaultQueueId: agent.defaultQueueId,
-    // Só consumidos pelo worker genérico (task.agent.generic.create) — atlas/axel
-    // ignoram, já que têm personalidade/RAG fixos em código.
+    // Só consumidos pelo worker "max" — atlas/axel ignoram, já que têm
+    // personalidade/RAG fixos em código.
     personality: agent.personality,
     ragEnabled: agent.ragEnabled,
   };
