@@ -4,6 +4,7 @@ import { assertQueueWithDlq } from "./connection";
 export const QUEUE_NOTIFICATION_STATUS_PROCESS = "notification.status.process";
 export const QUEUE_DESK_MESSAGE_INBOUND = "desk.message.inbound";
 export const QUEUE_OUTBOUND_MESSAGE_SEND = "outbound.message.send";
+export const QUEUE_OUTBOUND_MESSAGE_MARK_READ = "outbound.message.mark-read";
 
 /// Todo agente tem fila própria, nome derivado de Agent.name sanitizado
 /// (ex: Agent.name = "Suporte Financeiro" → task.agent.suportefinanceiro.create).
