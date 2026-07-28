@@ -28,6 +28,8 @@ function agentPayload(agent: {
   errorMessage: string;
   errorEnabled: boolean;
   defaultQueueId: string | null;
+  personality: string | null;
+  ragEnabled: boolean;
 }) {
   return {
     id: agent.id,
@@ -42,6 +44,10 @@ function agentPayload(agent: {
     errorMessage: agent.errorMessage,
     errorEnabled: agent.errorEnabled,
     defaultQueueId: agent.defaultQueueId,
+    // Só consumidos pelo worker genérico (task.agent.generic.create) — atlas/axel
+    // ignoram, já que têm personalidade/RAG fixos em código.
+    personality: agent.personality,
+    ragEnabled: agent.ragEnabled,
   };
 }
 

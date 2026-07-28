@@ -52,6 +52,9 @@ model Agent {
   defaultQueueId String?
   defaultQueue   Queue?  @relation(fields: [defaultQueueId], references: [id], onDelete: SetNull)
 
+  personality  String?
+  ragEnabled   Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
