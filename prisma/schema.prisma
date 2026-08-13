@@ -20,6 +20,7 @@ model Organization {
   metadata  String?
   cnpj      String
   status    String?  @default("ACTIVE")
+  tokenAcessApi String? @unique
 
   agents           Agent[]
   whatsappChannels WhatsappChannel[]
@@ -74,6 +75,7 @@ model WhatsappChannel {
   phoneNumberId String @unique
   displayNumber String
   wabaId        String @unique
+  metaAccessToken String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -92,6 +94,7 @@ model ServiceIsland {
   whatsappChannelId String          @unique
   whatsappChannel   WhatsappChannel @relation(fields: [whatsappChannelId], references: [id], onDelete: Cascade)
   name              String
+  allowActiveDispatch Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

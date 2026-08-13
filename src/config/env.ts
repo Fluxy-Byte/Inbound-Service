@@ -20,7 +20,6 @@ const envSchema = z.object({
   MONGO_DB_NAME: z.string().min(1),
 
   META_VERIFY_TOKEN: z.string().min(1),
-  META_ACCESS_TOKEN: z.string().min(1),
 
   APP_TIMEZONE: z.string().default("America/Sao_Paulo"),
 });

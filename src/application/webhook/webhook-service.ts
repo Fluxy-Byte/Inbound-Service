@@ -130,7 +130,7 @@ export async function handleInboundMessage(
   // gap do sistema deprecado), então tratamos igual a "AI" por ora.
   if (message.type !== "text") {
     await markSessionProcessing(messagingSession.id);
-    await requestTypingIndicator(channel, whatsappChannel.phoneNumberId, message.id);
+    await requestTypingIndicator(channel, whatsappChannel.id, whatsappChannel.phoneNumberId, message.id);
     await publishJson(channel, resolveAgentQueueName(whatsappChannel.agent.name), {
       target: targetPayload,
       whatsappChannel: whatsappChannelPayload,
@@ -190,7 +190,7 @@ export async function flushDebounceWindow(channel: Channel, messagingSessionId: 
   const whatsappChannel = target.whatsappChannel;
 
   await markSessionProcessing(messagingSessionId);
-  await requestTypingIndicator(channel, whatsappChannel.phoneNumberId, messages[messages.length - 1].externalMessageId);
+  await requestTypingIndicator(channel, whatsappChannel.id, whatsappChannel.phoneNumberId, messages[messages.length - 1].externalMessageId);
   await publishJson(channel, resolveAgentQueueName(whatsappChannel.agent.name), {
     target: { id: target.id, waId: target.waId, name: target.name, metadata: target.metadata },
     whatsappChannel: {

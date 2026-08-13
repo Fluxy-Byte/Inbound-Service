@@ -7,10 +7,12 @@ import { publishJson, QUEUE_OUTBOUND_MESSAGE_MARK_READ } from "../../infrastruct
 /// outbound-mark-read-consumer.ts), aqui só publicamos o pedido.
 export async function requestTypingIndicator(
   channel: Channel,
+  whatsappChannelId: string,
   phoneNumberId: string,
   externalMessageId: string,
 ): Promise<void> {
   await publishJson(channel, QUEUE_OUTBOUND_MESSAGE_MARK_READ, {
+    whatsappChannelId,
     phoneNumberId,
     externalMessageId,
     typingIndicator: true,
