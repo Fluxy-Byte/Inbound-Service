@@ -1,3 +1,4 @@
+import { normalizeBrazilianWaId } from "../../domain/utils/phone";
 import { prisma } from "../../infrastructure/database/prisma/client";
 
 export async function resolveWhatsappChannel(phoneNumberId: string) {
@@ -13,12 +14,14 @@ export async function resolveOrCreateTarget(input: {
   waId: string;
   name?: string;
 }) {
+  const waId = normalizeBrazilianWaId(input.waId);
+
   const existing = await prisma.target.findUnique({
     where: {
       organizationId_whatsappChannelId_waId: {
         organizationId: input.organizationId,
         whatsappChannelId: input.whatsappChannelId,
-        waId: input.waId,
+        waId,
       },
     },
   });
@@ -34,7 +37,7 @@ export async function resolveOrCreateTarget(input: {
     data: {
       organizationId: input.organizationId,
       whatsappChannelId: input.whatsappChannelId,
-      waId: input.waId,
+      waId,
       name: input.name,
       lastInteractionAt: new Date(),
     },
