@@ -1,5 +1,6 @@
 import type { Channel } from "amqplib";
 import type { MetaContact, MetaMessage } from "../../domain/meta-webhook";
+import { tryDecryptToken } from "../../infrastructure/crypto/token-cipher";
 import { prisma } from "../../infrastructure/database/prisma/client";
 import {
   publishJson,
@@ -31,6 +32,8 @@ function agentPayload(agent: {
   defaultQueueId: string | null;
   personality: string | null;
   ragEnabled: boolean;
+  openaiTokenEncrypted: string | null;
+  geminiTokenEncrypted: string | null;
 }) {
   return {
     id: agent.id,
@@ -49,6 +52,12 @@ function agentPayload(agent: {
     // personalidade/RAG fixos em código.
     personality: agent.personality,
     ragEnabled: agent.ragEnabled,
+    // Decifrados aqui mesmo, na borda de publicação — o AI-Worker usa esses
+    // valores direto (nunca mais do próprio env do processo). Token ausente
+    // ou cifrado com chave divergente vira null (tryDecryptToken loga e não
+    // derruba a mensagem); o worker trata a ausência do seu lado.
+    openaiToken: tryDecryptToken(agent.openaiTokenEncrypted, `openaiToken do agente ${agent.id}`),
+    geminiToken: tryDecryptToken(agent.geminiTokenEncrypted, `geminiToken do agente ${agent.id}`),
   };
 }
 

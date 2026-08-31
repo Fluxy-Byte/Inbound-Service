@@ -10,6 +10,11 @@ const envSchema = z.object({
   INTERNAL_API_KEY: z.string().min(1),
   AGENT_API_BASE_URL: z.string().min(1),
 
+  /// Decifra os tokens de terceiro por agente (openaiToken/geminiToken) antes
+  /// de repassá-los no payload pro AI-Worker — PRECISA ser idêntica à do
+  /// Agent-Api (ver token-cipher.ts nos dois lados).
+  AGENT_TOKEN_ENCRYPTION_KEY: z.string().min(1),
+
   REDIS_HOST: z.string().min(1),
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().min(1),

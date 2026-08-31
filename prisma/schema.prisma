@@ -12,15 +12,15 @@ datasource db {
 }
 
 model Organization {
-  id        String   @id
-  name      String
-  slug      String
-  logo      String?
-  createdAt DateTime
-  metadata  String?
-  cnpj      String
-  status    String?  @default("ACTIVE")
-  tokenAcessApi String? @unique
+  id            String   @id
+  name          String
+  slug          String
+  logo          String?
+  createdAt     DateTime
+  metadata      String?
+  cnpj          String
+  status        String?  @default("ACTIVE")
+  tokenAcessApi String?  @unique
 
   agents           Agent[]
   whatsappChannels WhatsappChannel[]
@@ -48,13 +48,20 @@ model Agent {
   closingMessage           String
   closingEnabled           Boolean @default(true)
   errorMessage             String
-  errorEnabled              Boolean @default(true)
+  errorEnabled             Boolean @default(true)
 
   defaultQueueId String?
   defaultQueue   Queue?  @relation(fields: [defaultQueueId], references: [id], onDelete: SetNull)
 
-  personality  String?
-  ragEnabled   Boolean @default(false)
+  personality String?
+  ragEnabled  Boolean @default(false)
+
+  /// Cifrados (AES-256-GCM) — decifrados aqui na hora de montar o payload
+  /// pro AI-Worker (ver src/infrastructure/crypto/token-cipher.ts e
+  /// application/webhook/webhook-service.ts#agentPayload). Nunca decifrar em
+  /// nenhum outro lugar nem logar o valor em claro.
+  openaiTokenEncrypted String?
+  geminiTokenEncrypted String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,9 +79,9 @@ model WhatsappChannel {
   agentId        String
   agent          Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  phoneNumberId String @unique
-  displayNumber String
-  wabaId        String @unique
+  phoneNumberId   String  @unique
+  displayNumber   String
+  wabaId          String  @unique
   metaAccessToken String?
 
   createdAt DateTime @default(now())
@@ -88,13 +95,13 @@ model WhatsappChannel {
 }
 
 model ServiceIsland {
-  id                String          @id @default(cuid())
-  organizationId    String
-  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  whatsappChannelId String          @unique
-  whatsappChannel   WhatsappChannel @relation(fields: [whatsappChannelId], references: [id], onDelete: Cascade)
-  name              String
-  allowActiveDispatch Boolean @default(false)
+  id                  String          @id @default(cuid())
+  organizationId      String
+  organization        Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  whatsappChannelId   String          @unique
+  whatsappChannel     WhatsappChannel @relation(fields: [whatsappChannelId], references: [id], onDelete: Cascade)
+  name                String
+  allowActiveDispatch Boolean         @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,9 +169,9 @@ enum SessionOrigin {
 }
 
 model MessagingSession {
-  id                String   @id @default(cuid())
+  id                String @id @default(cuid())
   targetId          String
-  target            Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  target            Target @relation(fields: [targetId], references: [id], onDelete: Cascade)
   whatsappChannelId String
 
   createdVia             SessionOrigin @default(CUSTOMER_MESSAGE)
