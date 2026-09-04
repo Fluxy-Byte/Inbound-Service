@@ -38,8 +38,6 @@ model Agent {
   name           String
   isActive       Boolean      @default(true)
 
-  welcomeMessage           String
-  welcomeEnabled           Boolean @default(true)
   processingMessage        String
   transferMessage          String
   unsupportedFormatMessage String
