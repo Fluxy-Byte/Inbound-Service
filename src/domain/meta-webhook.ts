@@ -26,7 +26,13 @@ export interface MetaChangeValue {
 
 export interface MetaContact {
   profile: { name?: string };
+  /// Telefone — a Meta omite quando o contato ativou @username e não há
+  /// troca recente de telefone (ver MetaMessage.from_user_id).
   wa_id?: string;
+  /// Business-Scoped User ID — presente em todo webhook desde abr/2026,
+  /// independente de @username. Vínculo principal do contato (ver
+  /// application/webhook/target-service.ts#resolveOrCreateTarget).
+  user_id?: string;
 }
 
 export type MetaMessageType =
@@ -41,7 +47,11 @@ export type MetaMessageType =
   | "contacts";
 
 export interface MetaMessage {
-  from: string;
+  /// Telefone do remetente — opcional pelo mesmo motivo de MetaContact.wa_id.
+  from?: string;
+  /// BSUID do remetente — espelha MetaContact.user_id, presente direto no
+  /// próprio objeto de mensagem.
+  from_user_id?: string;
   id: string;
   timestamp: string;
   type: MetaMessageType;

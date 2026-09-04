@@ -145,7 +145,13 @@ model Target {
   whatsappChannelId String
   whatsappChannel   WhatsappChannel @relation(fields: [whatsappChannelId], references: [id], onDelete: Cascade)
 
-  waId     String
+  /// Business-Scoped User ID (contacts[].user_id) — vínculo principal do
+  /// contato, sempre presente desde abr/2026. Nullable só pra Target
+  /// criado manualmente antes de o contato mandar mensagem de verdade.
+  bsuid String?
+  /// wa_id da Meta — agora opcional (omitido quando o contato ativa
+  /// @username e não há troca recente de telefone).
+  waId     String?
   name     String?
   email    String?
   metadata Json?
@@ -163,6 +169,7 @@ model Target {
 
   messagingSessions MessagingSession[]
 
+  @@unique([organizationId, whatsappChannelId, bsuid])
   @@unique([organizationId, whatsappChannelId, waId])
   @@index([organizationId])
   @@index([whatsappChannelId])

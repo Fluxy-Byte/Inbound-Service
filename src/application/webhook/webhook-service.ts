@@ -89,6 +89,7 @@ export async function handleInboundMessage(
   const target = await resolveOrCreateTarget({
     organizationId: whatsappChannel.organizationId,
     whatsappChannelId: whatsappChannel.id,
+    bsuid: contact?.user_id ?? message.from_user_id,
     waId: contact?.wa_id ?? message.from,
     name: contact?.profile?.name,
   });
