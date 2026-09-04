@@ -15,5 +15,6 @@ export async function handleStatus(channel: Channel, phoneNumberId: string, stat
     externalMessageId: status.id,
     waStatus: status.status,
     timestamp: status.timestamp,
+    recipientUserId: status.recipient_user_id,
   });
 }

@@ -63,4 +63,8 @@ export interface MetaStatus {
   status: "sent" | "delivered" | "read" | "failed";
   timestamp: string;
   recipient_id: string;
+  /// BSUID do destinatário — usado pra atualizar/corrigir Target.bsuid
+  /// quando o contato foi originalmente alcançado só por telefone (disparo
+  /// ativo de campanha, ver Notification-Worker/update-message-status.ts).
+  recipient_user_id?: string;
 }
