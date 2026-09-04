@@ -43,6 +43,7 @@ model Agent {
   processingMessage        String
   transferMessage          String
   unsupportedFormatMessage String
+  blockedMessage           String
   outOfHoursMessage        String
   outOfHoursEnabled        Boolean @default(true)
   closingMessage           String
@@ -152,6 +153,10 @@ model Target {
   status             TargetStatus @default(AI)
   firstInteractionAt DateTime     @default(now())
   lastInteractionAt  DateTime?
+
+  /// Ids de Agent que este contato está bloqueado de falar — ver
+  /// application/webhook/webhook-service.ts.
+  blockedAgentIds String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

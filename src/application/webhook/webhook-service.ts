@@ -122,6 +122,24 @@ export async function handleInboundMessage(
   };
   const messagingSessionPayload = { id: messagingSession.id, startedAt: messagingSession.startedAt };
 
+  // Bloqueio (Agent-Console > Contatos > cadeado): contato explicitamente
+  // impedido de falar com este agente — nem IA, nem atendente. A mensagem já
+  // foi salva no Mongo acima (fica no histórico), só não é roteada adiante.
+  if (target.blockedAgentIds.includes(whatsappChannel.agent.id)) {
+    console.log(
+      `[BLOCKED][webhook-service] targetId=${target.id} agentId=${whatsappChannel.agent.id} — contato bloqueado para este agente`,
+    );
+    await publishJson(channel, QUEUE_OUTBOUND_MESSAGE_SEND, {
+      target: targetPayload,
+      whatsappChannel: whatsappChannelPayload,
+      messagingSession: messagingSessionPayload,
+      answer: { text: whatsappChannel.agent.blockedMessage, audio: "", image: "" },
+      finishesProcessing: true,
+      origin: "SYSTEM",
+    });
+    return;
+  }
+
   if (target.status === "HUMAN") {
     console.log(`[DESK-MSG][webhook-service] targetId=${target.id} status=HUMAN — roteando para desk.message.inbound`);
     await publishJson(channel, QUEUE_DESK_MESSAGE_INBOUND, {
@@ -197,6 +215,29 @@ export async function flushDebounceWindow(channel: Channel, messagingSessionId: 
 
   const target = messagingSession.target;
   const whatsappChannel = target.whatsappChannel;
+
+  // Mesmo bloqueio checado em handleInboundMessage — precisa repetir aqui
+  // porque o flush é assíncrono/desacoplado: o estado de bloqueio pode ter
+  // mudado entre a mensagem chegar e a janela de debounce fechar.
+  if (target.blockedAgentIds.includes(whatsappChannel.agent.id)) {
+    console.log(
+      `[BLOCKED][webhook-service] (flush) targetId=${target.id} agentId=${whatsappChannel.agent.id} — contato bloqueado para este agente`,
+    );
+    await publishJson(channel, QUEUE_OUTBOUND_MESSAGE_SEND, {
+      target: { id: target.id, waId: target.waId, name: target.name, metadata: target.metadata },
+      whatsappChannel: {
+        id: whatsappChannel.id,
+        phoneNumberId: whatsappChannel.phoneNumberId,
+        wabaId: whatsappChannel.wabaId,
+        serviceIslandId: whatsappChannel.serviceIsland?.id ?? null,
+      },
+      messagingSession: { id: messagingSession.id, startedAt: messagingSession.startedAt },
+      answer: { text: whatsappChannel.agent.blockedMessage, audio: "", image: "" },
+      finishesProcessing: true,
+      origin: "SYSTEM",
+    });
+    return;
+  }
 
   await markSessionProcessing(messagingSessionId);
   await requestTypingIndicator(channel, whatsappChannel.id, whatsappChannel.phoneNumberId, messages[messages.length - 1].externalMessageId);
